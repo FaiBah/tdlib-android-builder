@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ git php zlib1g-dev libssl-dev default-jdk unzip wget
+          sudo apt install -y cmake g++ git php zlib1g-dev default-jdk unzip wget
 
       - name: Clone TDLib
         run: |
