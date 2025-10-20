@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ git zlib1g-dev libssl-dev php openjdk-17-jdk
+          sudo apt install -y cmake g++ git zlib1g-dev libssl-dev php openjdk-17-jdk gperf
 
       - name: Build TDLib (with SplitSource for low memory)
         run: |
