@@ -25,8 +25,8 @@ jobs:
           cd tdlib
           git checkout master
 
-      - name: Prepare Android NDK
-        uses: android-actions/setup-ndk@v2
+      - name: Setup Android NDK
+        uses: android/setup-android@v2
         with:
           ndk-version: r25c
 
@@ -38,7 +38,7 @@ jobs:
             cd tdlib/build-$ABI
             cmake -DCMAKE_BUILD_TYPE=Release \
                   -DTD_ENABLE_JNI=ON \
-                  -DCMAKE_TOOLCHAIN_FILE=$NDK_HOME/build/cmake/android.toolchain.cmake \
+                  -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
                   -DANDROID_ABI=$ABI \
                   -DANDROID_PLATFORM=android-21 \
                   ..
