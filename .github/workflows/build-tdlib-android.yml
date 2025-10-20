@@ -30,7 +30,7 @@ jobs:
         run: |
           git clone https://github.com/tdlib/td.git tdlib
           cd tdlib
-          git checkout v1.8.33
+          git checkout v1.8.0
 
       - name: Build TDLib for Android (all ABIs)
         run: |
