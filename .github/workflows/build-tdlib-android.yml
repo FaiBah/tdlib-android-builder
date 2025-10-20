@@ -8,49 +8,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout TDLib
-        uses: actions/checkout@v3
+      - name: Checkout TDLib source
+        uses: actions/checkout@v4
+        with:
+          repository: tdlib/td
+          path: td
 
       - name: Set up Android SDK + NDK + CMake
         uses: android-actions/setup-android@v2
         with:
           ndk-version: r25b
-          cmake-version: 3.26.4
+          cmake-version: 3.22.1
           api-level: 21
           build-tools-version: 34.0.0
 
-      # Build armeabi-v7a
       - name: Build TDLib for armeabi-v7a
         run: |
-          mkdir -p td/build-armeabi-v7a && cd td/build-armeabi-v7a
+          mkdir -p build-armeabi-v7a && cd build-armeabi-v7a
           cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_HOME/ndk/$NDK_VERSION/build/cmake/android.toolchain.cmake \
                 -DANDROID_ABI=armeabi-v7a \
                 -DANDROID_PLATFORM=android-21 \
                 -DCMAKE_BUILD_TYPE=Release \
-                ..
+                ../td
           cmake --build . -j$(nproc)
 
-      # Build arm64-v8a
       - name: Build TDLib for arm64-v8a
         run: |
-          mkdir -p td/build-arm64 && cd td/build-arm64
+          mkdir -p build-arm64-v8a && cd build-arm64-v8a
           cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_HOME/ndk/$NDK_VERSION/build/cmake/android.toolchain.cmake \
                 -DANDROID_ABI=arm64-v8a \
                 -DANDROID_PLATFORM=android-21 \
                 -DCMAKE_BUILD_TYPE=Release \
-                ..
+                ../td
           cmake --build . -j$(nproc)
 
-      # Upload armeabi-v7a library
       - name: Upload armeabi-v7a library
         uses: actions/upload-artifact@v4
         with:
           name: tdlib-armeabi-v7a
-          path: td/build-armeabi-v7a/libtdjson.so
+          path: build-armeabi-v7a/libtdjson.so
 
-      # Upload arm64-v8a library
       - name: Upload arm64-v8a library
         uses: actions/upload-artifact@v4
         with:
-          name: tdlib-arm64
-          path: td/build-arm64/libtdjson.so
+          name: tdlib-arm64-v8a
+          path: build-arm64-v8a/libtdjson.so
