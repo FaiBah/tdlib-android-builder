@@ -19,6 +19,16 @@ jobs:
           unzip -q android-ndk-r25b-linux.zip -d /usr/local/
           mv /usr/local/android-ndk-r25b /usr/local/android-ndk
 
+      - name: Build TDLib for armeabi-v7a
+        run: |
+          mkdir -p td/build-armeabi-v7a && cd td/build-armeabi-v7a
+          cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
+                -DANDROID_ABI=armeabi-v7a \
+                -DANDROID_PLATFORM=android-21 \
+                -DCMAKE_BUILD_TYPE=Release \
+                ..
+          cmake --build . -j$(nproc)
+
       - name: Build TDLib for arm64-v8a
         run: |
           mkdir -p td/build-arm64 && cd td/build-arm64
@@ -29,8 +39,14 @@ jobs:
                 ..
           cmake --build . -j$(nproc)
 
-      - name: Upload built library
-        uses: actions/upload-artifact@v3
+      - name: Upload armeabi-v7a library
+        uses: actions/upload-artifact@v3.1.3
+        with:
+          name: tdlib-armeabi-v7a
+          path: td/build-armeabi-v7a/libtdjson.so
+
+      - name: Upload arm64-v8a library
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: tdlib-arm64
           path: td/build-arm64/libtdjson.so
