@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # needed to commit files
+  contents: write
 
 jobs:
   build:
@@ -23,7 +23,7 @@ jobs:
         run: |
           git clone https://github.com/tdlib/td.git tdlib
           cd tdlib
-          git checkout master   # latest commit (only v1.8.0 tag exists)
+          git checkout master
 
       - name: Prepare Android NDK
         uses: android-actions/setup-ndk@v2
@@ -70,12 +70,8 @@ jobs:
             cp tdlib/build-$ABI/libtdjni.so build-output/lib/$ABI/
           done
 
-      - name: Package everything into ZIP
-        run: |
-          zip -r tdlib-android.zip build-output
-
-      - name: Upload artifact
+      - name: Upload build-output folder as artifact
         uses: actions/upload-artifact@v4
         with:
           name: tdlib-android
-          path: tdlib-android.zip
+          path: build-output/
