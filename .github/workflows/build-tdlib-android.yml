@@ -1,0 +1,69 @@
+name: Build TDLib for Android and Commit Zip
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to push changes
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake g++ git zlib1g-dev libssl-dev openjdk-17-jdk
+
+      - name: Set up Android SDK and NDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-levels: 34
+          ndk: 26.1.10909125
+          build-tools: 34.0.0
+
+      - name: Clone TDLib
+        run: |
+          git clone https://github.com/tdlib/td.git tdlib
+          cd tdlib
+          git checkout v1.8.33
+
+      - name: Build TDLib for Android (all ABIs)
+        run: |
+          cd tdlib
+          for abi in arm64-v8a armeabi-v7a x86_64 x86; do
+            mkdir -p build-$abi
+            cd build-$abi
+            cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
+                  -DANDROID_ABI=$abi \
+                  -DANDROID_PLATFORM=android-21 \
+                  -DTD_ENABLE_JNI=ON \
+                  -DCMAKE_BUILD_TYPE=Release ..
+            cmake --build . --target java -- -j$(nproc)
+            cd ..
+          done
+
+      - name: Package TDLib Android Builds
+        run: |
+          mkdir -p tdlib-android
+          for abi in arm64-v8a armeabi-v7a x86_64 x86; do
+            mkdir -p tdlib-android/$abi
+            cp tdlib/build-$abi/java/libtdjni.so tdlib-android/$abi/ || true
+            cp tdlib/build-$abi/java/tdlib.jar tdlib-android/$abi/ || true
+          done
+          zip -r tdlib-android.zip tdlib-android
+          ls -lh tdlib-android.zip
+
+      - name: Commit and Push the Build
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p builds
+          mv tdlib-android.zip builds/
+          git add builds/tdlib-android.zip
+          git commit -m "Auto-build TDLib Android $(date -u +'%Y-%m-%d %H:%M:%S')" || exit 0
+          git push
