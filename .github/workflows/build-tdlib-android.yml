@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ git php zlib1g-dev libssl-dev default-jdk unzip
+          sudo apt install -y cmake g++ git php zlib1g-dev libssl-dev default-jdk unzip wget
 
       - name: Clone TDLib
         run: |
@@ -25,10 +25,12 @@ jobs:
           cd tdlib
           git checkout master
 
-      - name: Setup Android NDK
-        uses: android/setup-android@v2
-        with:
-          ndk-version: r25c
+      - name: Download and setup Android NDK
+        run: |
+          wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+          unzip android-ndk-r25c-linux.zip
+          echo "ANDROID_NDK_HOME=$PWD/android-ndk-r25c" >> $GITHUB_ENV
+          echo "PATH=$PWD/android-ndk-r25c:$PATH" >> $GITHUB_ENV
 
       - name: Build TDLib for each ABI
         run: |
